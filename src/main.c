@@ -7,8 +7,10 @@
 
 int main(void)
 {
-    struct sockaddr_in server_addr;
+    struct sockaddr_in server_addr, client_addr;
     int server_fd, new_socket;
+    socklen_t client_len = sizeof(client_addr);
+    int opt = 1;
 
     memset(&server_addr, 0, sizeof(server_addr));
 
@@ -22,6 +24,13 @@ int main(void)
         exit(EXIT_FAILURE);
     }
 
+    // Allow immediate reuse of the port after restart
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        perror("setsockopt failed");
+        close(server_fd);
+        exit(EXIT_FAILURE);
+    }
+
     if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
         perror("bind failed");
         close(server_fd);
@@ -30,6 +39,24 @@ int main(void)
 
     printf("Bind successful on port 8080\n");
 
+    if (listen(server_fd, 5) < 0) {
+        perror("listen failed");
+        close(server_fd);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Server listening on port 8080...\n");
+
+    new_socket = accept(server_fd, (struct sockaddr *)&client_addr, &client_len);
+    if (new_socket < 0) {
+        perror("accept failed");
+        close(server_fd);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Client connected!\n");
+
+    close(new_socket);
     close(server_fd);
     return 0;
 }
