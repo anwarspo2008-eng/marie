@@ -1,11 +1,11 @@
 #include <netinet/in.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <signal.h>
 
 int main(void)
 {
@@ -50,7 +50,7 @@ int main(void)
 
     printf("Server listening on port 8080...\n");
 
-    signal(SIGCHLD, SIG_IGN);
+    signal(SIGCHLD, SIG_IGN);  
 
     while (1) {
         new_socket = accept(server_fd, (struct sockaddr *)&client_addr, &client_len);
@@ -64,7 +64,6 @@ int main(void)
         pid_t pid = fork();
 
         if (pid < 0) {
-            
             perror("fork failed");
             close(new_socket);
             continue;
@@ -72,26 +71,42 @@ int main(void)
 
         if (pid == 0) {
             
-            close(server_fd); 
+            close(server_fd);  
 
-            ssize_t bytes_received = recv(new_socket, recv_data, sizeof(recv_data) - 1, 0);
-            if (bytes_received <= 0) {
-                printf("Client disconnected or recv error\n");
-                close(new_socket);
-                exit(0);
+            while (1) {
+                ssize_t bytes_received = recv(new_socket, recv_data, sizeof(recv_data) - 1, 0);
+
+                if (bytes_received <= 0) {
+                    printf("Client disconnected or recv error\n");
+                    break;
+                }
+
+                recv_data[bytes_received] = '\0';
+
+                size_t len = strlen(recv_data);
+                if (len > 0 && recv_data[len - 1] == '\n') {
+                    recv_data[len - 1] = '\0';
+                    len--;
+                }
+                if (len > 0 && recv_data[len - 1] == '\r') {
+                    recv_data[len - 1] = '\0';
+                }
+
+                printf("Received: %s\n", recv_data);
+
+                if (strcmp(recv_data, "quit") == 0) {
+                    printf("Client requested to quit\n");
+                    break;
+                }
+
+                strcpy(send_data, "Message received\n");
+                ssize_t bytes_sent = send(new_socket, send_data, strlen(send_data), 0);
+                printf("Bytes sent: %zd\n", bytes_sent);
             }
 
-            recv_data[bytes_received] = '\0';
-            printf("Received: %s", recv_data);
-
-            strcpy(send_data, "Message received");
-            ssize_t bytes_sent = send(new_socket, send_data, strlen(send_data), 0);
-            printf("Bytes sent: %zd", bytes_sent);
-
             close(new_socket);
-            exit(0);  
+            exit(0);
         } else {
-            
             close(new_socket);  
         }
     }
