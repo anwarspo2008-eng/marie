@@ -107,7 +107,7 @@ void start_server(void)
             char password[128] = {0};
 
             // Send initial welcome message to newly connected client
-            const char *welcome = "Connected to Marie Server.\nType 'loginshell' to authenticate.\n> ";
+            const char *welcome = "Connected to Marie Server.\n> ";
             send(new_socket, welcome, strlen(welcome), 0);
 
             // Client interaction loop (handles login and commands)
