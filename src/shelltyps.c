@@ -1,35 +1,31 @@
 #include <string.h>
-#include <stdio.h>
-#include <sys/socket>
+#include <stddef.h>
+#include "shelltypes.h"
 
-static const char *shellmodes = 
-    {
-        loginshell ,
-        help ,
-        about
-    }
-void typeshell(int client_fd , const char *input_mode , const char *username)
+// The dispatch table: one entry per shell. To add a new shell later,
+// write its handler in its own file, declare it in shelltypes.h, and
+// add one line here. dispatch_shell_command() is the only thing that
+// reads this table, so nothing else in the codebase needs to change.
+typedef struct {
+    const char *name;
+    void (*handler)(shell_ctx_t *ctx);
+} shell_command_t;
+
+static const shell_command_t shell_table[] = {
+    { "loginshell", loginshell_shell },
+    { "help",       help_shell       },
+    { "about",      about_shell      },
+};
+
+#define SHELL_COUNT (sizeof(shell_table) / sizeof(shell_table[0]))
+
+int dispatch_shell_command(const char *input, shell_ctx_t *ctx)
 {
-    char res[512];
-    int mode_found = 0;
-    int i = 0;
-
-    for (i = 0 ;shellmodes[i] != '\0' ; i ++)
-    {
-        if (strcmp(input_mode , shellmodes[i]) == 0)
-        {
-            mode_found = 1;
-               if (strcmp(input_mode , help) == 0){
-                
-               } 
+    for (size_t i = 0; i < SHELL_COUNT; i++) {
+        if (strcmp(input, shell_table[i].name) == 0) {
+            shell_table[i].handler(ctx);
+            return 1;
         }
     }
-    if (!mode found)
-    {
-        snprintf(res , sizeof(res),"Unknown command try : help \n" , input_mode);
-        send(client_fd , res , strlen(res), 0);
-    }
-    if (strcmp())
-
+    return 0;
 }
-    

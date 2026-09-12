@@ -8,9 +8,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-// Custom project headers for authentication and ASCII graphics
-#include "auth.h"
-#include "Look.h"
+// Custom project header for the shell dispatch table
+#include "shelltypes.h"
 
 // Helper function: Removes invisible newline ('\n') and carriage return ('\r') 
 // characters from the end of user input (like when pressing Enter in netcat)
@@ -132,43 +131,19 @@ void start_server(void)
                     break;
                 }
 
-                // UNAUTHENTICATED STATE: Force client to type 'loginshell' and supply credentials
+                // UNAUTHENTICATED STATE: dispatch to whichever shell the
+                // client typed (loginshell, help, about, ...). New shells
+                // added to shell_table in shelltyps.c show up here for free.
                 if (!authenticated) {
-                    if (strcmp(recv_data, "loginshell") == 0) {
-                        // 1. Prompt and read username
-                        const char *u_prompt = "Username: ";
-                        send(new_socket, u_prompt, strlen(u_prompt), 0);
+                    shell_ctx_t ctx = {
+                        .socket_fd     = new_socket,
+                        .authenticated = &authenticated,
+                        .username      = username,
+                        .password      = password
+                    };
 
-                        memset(username, 0, sizeof(username));
-                        ssize_t u_bytes = recv(new_socket, username, sizeof(username) - 1, 0);
-                        if (u_bytes <= 0) break;
-                        username[u_bytes] = '\0';
-                        trim_line(username);
-
-                        // 2. Prompt and read password
-                        const char *p_prompt = "Password: ";
-                        send(new_socket, p_prompt, strlen(p_prompt), 0);
-
-                        memset(password, 0, sizeof(password));
-                        ssize_t p_bytes = recv(new_socket, password, sizeof(password) - 1, 0);
-                        if (p_bytes <= 0) break;
-                        password[p_bytes] = '\0';
-                        trim_line(password);
-
-                        // 3. Verify credentials against users.txt
-                        if (check_credentials(username, password)) {
-                            authenticated = 1; // Mark client as authenticated
-                            const char *ok_msg = "Login successful!\n\n";
-                            send(new_socket, ok_msg, strlen(ok_msg), 0);
-
-                            // Send ASCII banner and user details to screen
-                            send_ascii_logo(new_socket, username, password);
-                        } else {
-                            const char *err_msg = "Invalid username or password. Type 'loginshell' to try again.\n> ";
-                            send(new_socket, err_msg, strlen(err_msg), 0);
-                        }
-                    } else {
-                        const char *gate_msg = "Access Denied. Please type 'loginshell' to log in.\n> ";
+                    if (!dispatch_shell_command(recv_data, &ctx)) {
+                        const char *gate_msg = "Unknown command. Type 'help' to see available shells.\n> ";
                         send(new_socket, gate_msg, strlen(gate_msg), 0);
                     }
                     continue; // Loop back for next input
