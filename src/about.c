@@ -10,8 +10,8 @@ void about_shell(shell_ctx_t *ctx)
         "version : 0 . 1 \n"
         "description : A lightweight, self-hosted socket server for a home lab.\n"
         "state : still under devlopement \n"
-        "Type 'help' to see available shells.\n> ";
-        "MORE FEATURES SOON"
+        "Type 'help' to see available shells.\n> "
+        "more features soon\n";
     send(ctx->socket_fd, about, strlen(about), 0);
 }
 

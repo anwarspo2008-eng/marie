@@ -1,6 +1,6 @@
 # --- Compiler & Flags ---
 CC      := gcc
-CFLAGS  := -Wall -Wextra -Werror -Iincludes
+CFLAGS  := -Wall -Wextra -Werror -Iincludes 
 RM      := rm -rf
 
 # --- Program Name ---
