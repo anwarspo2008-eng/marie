@@ -14,4 +14,3 @@ void about_shell(shell_ctx_t *ctx)
         "more features soon\n";
     send(ctx->socket_fd, about, strlen(about), 0);
 }
-
