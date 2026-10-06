@@ -31,7 +31,6 @@ The login banner's ASCII art was pulled from the cover of Drake's *If You're Rea
 | 🗝️ **Gated login** | Nothing runs until `loginshell` checks out against `users.txt` |
 | 🧩 **Pluggable shells** | `help`, `about`, `loginshell` today — each is one file, one line in a table |
 | 🌍 **Multilingual help** | The `help` shell speaks English, French, and Arabic |
-| 🎨 **A logo with a backstory** | Post-login ASCII art inspired by an album, not a template |
 
 ## 🖥️ What it looks like
 
