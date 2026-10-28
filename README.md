@@ -27,12 +27,11 @@ The login banner's ASCII art was pulled from the cover of Drake's *If You're Rea
 
 | | |
 |---|---|
-| 🔌 **One process per client** | Every connection gets its own forked, isolated process |
-| 🗝️ **Gated login** | Nothing runs until `loginshell` checks out against `users.txt` |
-| 🧩 **Pluggable shells** | `help`, `about`, `loginshell` today — each is one file, one line in a table |
-| 🌍 **Multilingual help** | The `help` shell speaks English, French, and Arabic |
+| **One process per client** | Every connection gets its own forked, isolated process |
+| **Gated login** | Nothing runs until `loginshell` checks out against `users.txt` |
+| **Pluggable shells** | `help`, `about`, `loginshell` today — each is one file, one line in a table |
 
-## 🖥️ What it looks like
+##  What it looks like
 
 ```text
 $ nc 127.0.0.1 8080
@@ -78,7 +77,7 @@ Login successful!
 > quit
 ```
 
-## 🧠 How it flows
+##  How it flows
 
 ```
         accept() blocks
@@ -115,7 +114,7 @@ Every shell is its own file with one function: `void my_shell(shell_ctx_t *ctx)`
 
 Nothing else changes — the Makefile globs `src/*.c` automatically.
 
-## 📁 Project layout
+##  Project layout
 
 ```
 src/
@@ -133,7 +132,7 @@ users.txt         username/password pairs, one per line
 Makefile          builds every src/*.c → obj/*.o → ./marie
 ```
 
-## 🚀 Building and running
+##  Building and running
 
 ```bash
 make        # builds ./marie
@@ -153,17 +152,17 @@ nc 127.0.0.1 8080
 | `make fclean` | remove object files + binary |
 | `make re` | clean rebuild |
 
-## 🔐 Current authentication
+##  Current authentication
 
 Credentials live in `users.txt` as plaintext `username password` pairs, checked with a direct string comparison. Simple on purpose, for now.
 
-## 🗺️ Roadmap
+##  Roadmap
 
 - [ ] **Hash stored passwords** — stop storing and comparing plaintext credentials in `users.txt`
 - [ ] **New shells** — grow beyond `help` / `about` / `loginshell`
 - [ ] **Authenticated command table** — replace the current `ACK:` echo with real tools, dispatched the same way the login-side shells are
 
-## 🎧 Credits
+##  Credits
 
 The post-login banner's owl silhouette is a nod to Drake's *If You're Reading This It's Too Late* — one of the maintainer's favorite albums. Log in and you'll see it.
 
